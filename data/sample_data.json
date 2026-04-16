@@ -1,0 +1,217 @@
+{
+  "sample_analyses": [
+    {
+      "keyword": "best web hosting",
+      "search_volume": 22100,
+      "monthly_searches": 22100,
+      "difficulty": 52,
+      "cpc": 1.25,
+      "trend": "stable",
+      "search_intent": "commercial",
+      "related_keywords": [
+        "web hosting for beginners",
+        "cheap web hosting",
+        "best wordpress hosting",
+        "reliable web hosting",
+        "fastest web hosting"
+      ],
+      "opportunity_score": 78,
+      "recommendation": "High opportunity. Medium competition but high commercial intent. Target long-tail variants."
+    },
+    {
+      "keyword": "python tutorial",
+      "search_volume": 12100,
+      "monthly_searches": 12100,
+      "difficulty": 45,
+      "cpc": 0.85,
+      "trend": "declining",
+      "search_intent": "informational",
+      "related_keywords": [
+        "python programming for beginners",
+        "learn python online",
+        "python tutorial for beginners",
+        "python basics",
+        "python syntax"
+      ],
+      "opportunity_score": 65,
+      "recommendation": "Good for content. High volume but declining trend. Position as 'Ultimate Python Guide 2026'."
+    },
+    {
+      "keyword": "digital marketing agency",
+      "search_volume": 8900,
+      "monthly_searches": 8900,
+      "difficulty": 68,
+      "cpc": 5.50,
+      "trend": "growing",
+      "search_intent": "commercial",
+      "related_keywords": [
+        "digital marketing services",
+        "social media marketing agency",
+        "seo marketing agency",
+        "digital marketing consultant",
+        "content marketing agency"
+      ],
+      "opportunity_score": 82,
+      "recommendation": "High-value keyword. Growing trend. Premium positioning recommended. Target niche: 'Digital Marketing Agency for SaaS'."
+    },
+    {
+      "keyword": "api integration",
+      "search_volume": 5600,
+      "monthly_searches": 5600,
+      "difficulty": 38,
+      "cpc": 2.10,
+      "trend": "stable",
+      "search_intent": "informational",
+      "related_keywords": [
+        "rest api integration",
+        "third party api integration",
+        "payment gateway integration",
+        "api integration tutorial",
+        "webhook integration"
+      ],
+      "opportunity_score": 71,
+      "recommendation": "Technical audience. Good for developer-focused content. Create comprehensive integration guide."
+    },
+    {
+      "keyword": "ecommerce platform",
+      "search_volume": 14200,
+      "monthly_searches": 14200,
+      "difficulty": 62,
+      "cpc": 3.75,
+      "trend": "growing",
+      "search_intent": "commercial",
+      "related_keywords": [
+        "best ecommerce platform",
+        "ecommerce solution",
+        "shopify alternative",
+        "woocommerce vs shopify",
+        "ecommerce software"
+      ],
+      "opportunity_score": 88,
+      "recommendation": "Excellent opportunity. High volume, growing trend, high CPC. Create comparison content."
+    }
+  ],
+  "sample_content_generation": {
+    "keyword": "best seo tools 2026",
+    "content_type": "article",
+    "tone": "professional",
+    "language": "en",
+    "generated": {
+      "title": "Best SEO Tools 2026: Complete Comparison & Buyer's Guide",
+      "meta_description": "Discover the top SEO tools for 2026. Compare features, pricing, and performance. Find the perfect tool for your needs.",
+      "meta_keywords": [
+        "best seo tools 2026",
+        "seo software comparison",
+        "seo tools for agencies",
+        "free seo tools"
+      ],
+      "outline": [
+        {
+          "section": "Introduction",
+          "subsections": [
+            "Why SEO tools matter in 2026",
+            "How to choose the right SEO tool",
+            "What to look for in SEO software"
+          ]
+        },
+        {
+          "section": "Top SEO Tools Reviewed",
+          "subsections": [
+            "SemRush",
+            "Ahrefs",
+            "Moz Pro",
+            "SE Ranking",
+            "SEO Analyzer Pro",
+            "Serpstat",
+            "Ubersuggest"
+          ]
+        },
+        {
+          "section": "Pricing Comparison",
+          "subsections": [
+            "Budget-friendly options",
+            "Mid-range tools",
+            "Enterprise solutions",
+            "Free alternatives"
+          ]
+        },
+        {
+          "section": "Feature Comparison Table",
+          "subsections": [
+            "Keyword research",
+            "Competitor analysis",
+            "Backlink tracking",
+            "Content optimization",
+            "Rank tracking"
+          ]
+        },
+        {
+          "section": "FAQs",
+          "subsections": [
+            "What's the best SEO tool?",
+            "Is SEO tooling necessary?",
+            "Can I use free tools only?"
+          ]
+        }
+      ],
+      "intro_paragraph": "In 2026, SEO has evolved significantly. What worked in 2023 no longer works today. You need modern tools that combine traditional SEO metrics with AI-powered insights, content generation, and competitive intelligence. This guide compares the best SEO tools available today, helping you choose the right one for your needs and budget.",
+      "estimated_word_count": 3500,
+      "estimated_read_time_minutes": 12
+    }
+  },
+  "sample_competitor_analysis": {
+    "target_keyword": "seo tools",
+    "analyzed_competitors": [
+      {
+        "domain": "semrush.com",
+        "title": "Semrush: SEO Tools for Business Growth",
+        "monthly_traffic_estimate": 2400000,
+        "backlinks_estimate": 15000,
+        "referring_domains": 8500,
+        "top_keywords": [
+          "seo tools",
+          "seo software",
+          "competitor analysis tool",
+          "keyword research tool",
+          "backlink checker"
+        ],
+        "content_strengths": [
+          "Comprehensive features",
+          "Case studies",
+          "Free tools section",
+          "Webinars and training"
+        ],
+        "content_gaps": [
+          "Limited free tier",
+          "High pricing",
+          "Complex interface for beginners"
+        ]
+      },
+      {
+        "domain": "ahrefs.com",
+        "title": "Ahrefs - SEO Tools for Research & Rank Tracking",
+        "monthly_traffic_estimate": 1800000,
+        "backlinks_estimate": 12000,
+        "referring_domains": 7200,
+        "top_keywords": [
+          "backlink checker",
+          "seo tools",
+          "keyword research",
+          "seo audit tool",
+          "competitor analysis"
+        ],
+        "content_strengths": [
+          "Excellent backlink data",
+          "Blog with valuable content",
+          "Free tier available",
+          "Industry reputation"
+        ],
+        "content_gaps": [
+          "No content generation",
+          "Limited international support",
+          "Steep learning curve"
+        ]
+      }
+    ]
+  }
+}
