@@ -40,9 +40,9 @@ class KeywordAnalysis(BaseModel):
     
 class ContentGenerationRequest(BaseModel):
     keyword: str = Field(..., min_length=1, max_length=100)
-    content_type: str = Field("article", regex="^(article|meta|title|description)$")
-    language: str = Field("fr", regex="^(fr|en|es|de)$")
-    tone: str = Field("professional", regex="^(professional|casual|technical)$")
+    content_type: str = Field("article", pattern="^(article|meta|title|description)$")
+    language: str = Field("fr", pattern="^(fr|en|es|de)$")
+    tone: str = Field("professional", pattern="^(professional|casual|technical)$")
     
 class BacklinkAnalysis(BaseModel):
     domain: str
