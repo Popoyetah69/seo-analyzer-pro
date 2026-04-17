@@ -9,6 +9,8 @@ import os
 from dotenv import load_dotenv
 import hashlib
 import json
+from backend.auth import AuthManager
+from backend.scraper import LegalDataScraper
 
 load_dotenv()
 
@@ -54,6 +56,20 @@ class UserAnalysis(BaseModel):
     created_at: datetime
     keyword: str
     results: dict
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    plan: str = "free"
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    plan: str
 
 # ==================== MOCK DATA & FUNCTIONS ====================
 
@@ -226,6 +242,91 @@ async def get_pricing() -> dict:
 async def swagger_docs():
     """Documentation interactive de l'API"""
     return {"message": "Visit /docs for Swagger UI"}
+
+# ==================== AUTHENTICATION ENDPOINTS ====================
+
+@app.post("/api/auth/signup", response_model=dict, tags=["Authentication"])
+async def signup(request: SignupRequest):
+    """Crée un nouveau compte utilisateur"""
+    result = AuthManager.create_user(request.email, request.password, request.plan)
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
+
+@app.post("/api/auth/login", response_model=TokenResponse, tags=["Authentication"])
+async def login(request: LoginRequest):
+    """Authentifie un utilisateur et retourne un JWT token"""
+    result = AuthManager.authenticate_user(request.email, request.password)
+    if "error" in result:
+        raise HTTPException(status_code=401, detail=result["error"])
+    return TokenResponse(
+        access_token=result["access_token"],
+        token_type=result["token_type"],
+        plan=result["plan"]
+    )
+
+@app.post("/api/auth/verify", tags=["Authentication"])
+async def verify_token(token: str = Header(None)):
+    """Vérifie si un JWT token est valide"""
+    if not token:
+        raise HTTPException(status_code=401, detail="Token required")
+    
+    payload = AuthManager.verify_token(token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+    
+    return {"valid": True, "user": payload.get("sub"), "plan": payload.get("plan")}
+
+@app.post("/api/auth/upgrade-plan", tags=["Authentication"])
+async def upgrade_plan(email: str, new_plan: str = Query(..., regex="^(free|pro|enterprise)$")):
+    """Upgrade le plan d'un utilisateur"""
+    result = AuthManager.upgrade_plan(email, new_plan)
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return result
+
+# ==================== LEGAL SCRAPING ENDPOINTS ====================
+
+@app.get("/api/scrape/keyword/{keyword}", tags=["Legal Scraping"])
+async def scrape_keyword(keyword: str):
+    """Récupère les données d'un keyword depuis des sources officielles"""
+    return LegalDataScraper.scrape_keyword_data(keyword)
+
+@app.get("/api/scrape/backlinks/{domain}", tags=["Legal Scraping"])
+async def scrape_backlinks(domain: str):
+    """Récupère les données de backlinks d'un domaine"""
+    return LegalDataScraper.scrape_backlink_data(domain)
+
+@app.get("/api/scrape/competitor/{domain}", tags=["Legal Scraping"])
+async def scrape_competitor(domain: str):
+    """Analyse complète du domaine concurrent"""
+    return LegalDataScraper.scrape_competitor_data(domain)
+
+@app.get("/api/scrape/trending", tags=["Legal Scraping"])
+async def scrape_trending():
+    """Récupère les sujets tendance actuels"""
+    return {"trending_topics": LegalDataScraper.scrape_trending_topics()}
+
+@app.get("/api/scrape/content-ideas/{keyword}", tags=["Legal Scraping"])
+async def scrape_content_ideas(keyword: str):
+    """Génère des idées de contenu basées sur un keyword"""
+    return {"content_ideas": LegalDataScraper.scrape_content_ideas(keyword)}
+
+@app.post("/api/scrape/batch-keywords", tags=["Legal Scraping"])
+async def scrape_batch_keywords(keywords: List[str] = Query(...)):
+    """Récupère les données pour plusieurs keywords"""
+    if len(keywords) > 50:
+        raise HTTPException(status_code=400, detail="Maximum 50 keywords per batch")
+    
+    return {
+        "results": LegalDataScraper.batch_scrape_keywords(keywords),
+        "total": len(keywords)
+    }
+
+@app.get("/api/scrape/status", tags=["Legal Scraping"])
+async def scrape_status():
+    """Affiche le statut du système de scraping"""
+    return LegalDataScraper.get_scraping_status()
 
 # ==================== ERROR HANDLERS ====================
 

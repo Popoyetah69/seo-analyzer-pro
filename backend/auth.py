@@ -1,0 +1,122 @@
+"""
+Authentication system using JWT tokens
+"""
+from datetime import datetime, timedelta
+from typing import Optional, Dict
+import jwt
+import hashlib
+import secrets
+
+# In production, use environment variables
+SECRET_KEY = "your-secret-key-change-in-production"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_DAYS = 30
+
+class AuthManager:
+    """Manages user authentication and JWT tokens"""
+    
+    # Mock database of users - in production use real database
+    users_db: Dict[str, Dict] = {}
+    
+    @staticmethod
+    def hash_password(password: str) -> str:
+        """Hash password using SHA256"""
+        return hashlib.sha256(password.encode()).hexdigest()
+    
+    @staticmethod
+    def verify_password(plain_password: str, hashed_password: str) -> bool:
+        """Verify password against hash"""
+        return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
+    
+    @classmethod
+    def create_user(cls, email: str, password: str, plan: str = "free") -> Dict:
+        """Create new user account"""
+        if email in cls.users_db:
+            return {"error": "User already exists"}
+        
+        user = {
+            "email": email,
+            "password_hash": cls.hash_password(password),
+            "plan": plan,
+            "created_at": datetime.utcnow().isoformat(),
+            "api_calls": 0,
+            "limit": cls._get_plan_limit(plan),
+            "api_key": secrets.token_urlsafe(32)
+        }
+        cls.users_db[email] = user
+        return {"success": True, "user_id": email, "api_key": user["api_key"]}
+    
+    @classmethod
+    def authenticate_user(cls, email: str, password: str) -> Dict:
+        """Authenticate user and return JWT token"""
+        if email not in cls.users_db:
+            return {"error": "User not found"}
+        
+        user = cls.users_db[email]
+        if not cls.verify_password(password, user["password_hash"]):
+            return {"error": "Invalid password"}
+        
+        # Create JWT token
+        token = cls.create_access_token({"sub": email, "plan": user["plan"]})
+        return {"access_token": token, "token_type": "bearer", "plan": user["plan"]}
+    
+    @staticmethod
+    def create_access_token(data: Dict, expires_delta: Optional[timedelta] = None) -> str:
+        """Create JWT access token"""
+        to_encode = data.copy()
+        
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(days=ACCESS_TOKEN_EXPIRE_DAYS)
+        
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+        return encoded_jwt
+    
+    @staticmethod
+    def verify_token(token: str) -> Optional[Dict]:
+        """Verify JWT token and return payload"""
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            return payload
+        except jwt.ExpiredSignatureError:
+            return None
+        except jwt.InvalidTokenError:
+            return None
+    
+    @staticmethod
+    def _get_plan_limit(plan: str) -> int:
+        """Get API call limit for plan"""
+        limits = {
+            "free": 100,
+            "pro": 5000,
+            "enterprise": 50000
+        }
+        return limits.get(plan, 100)
+    
+    @classmethod
+    def check_rate_limit(cls, email: str) -> bool:
+        """Check if user has API calls remaining"""
+        if email not in cls.users_db:
+            return False
+        
+        user = cls.users_db[email]
+        return user["api_calls"] < user["limit"]
+    
+    @classmethod
+    def increment_api_calls(cls, email: str) -> None:
+        """Increment API call count"""
+        if email in cls.users_db:
+            cls.users_db[email]["api_calls"] += 1
+    
+    @classmethod
+    def upgrade_plan(cls, email: str, new_plan: str) -> Dict:
+        """Upgrade user plan"""
+        if email not in cls.users_db:
+            return {"error": "User not found"}
+        
+        cls.users_db[email]["plan"] = new_plan
+        cls.users_db[email]["limit"] = cls._get_plan_limit(new_plan)
+        cls.users_db[email]["api_calls"] = 0  # Reset counter
+        return {"success": True, "new_plan": new_plan}
