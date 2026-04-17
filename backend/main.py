@@ -286,7 +286,7 @@ async def verify_token(token: str = Header(None)):
     return {"valid": True, "user": payload.get("sub"), "plan": payload.get("plan")}
 
 @app.post("/api/auth/upgrade-plan", tags=["Authentication"])
-async def upgrade_plan(email: str, new_plan: str = Query(..., regex="^(free|pro|enterprise)$")):
+async def upgrade_plan(email: str, new_plan: str = Query(..., pattern="^(free|pro|enterprise)$")):
     """Upgrade le plan d'un utilisateur"""
     result = AuthManager.upgrade_plan(email, new_plan)
     if "error" in result:
