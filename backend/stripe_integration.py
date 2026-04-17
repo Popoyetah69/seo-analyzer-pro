@@ -135,8 +135,8 @@ async def create_checkout_session(request: CreateCheckoutSession):
                 "company": request.company or "N/A"
             },
             mode="subscription",
-            success_url="https://yourdomain.com/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url="https://yourdomain.com/canceled",
+            success_url="http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="http://localhost:3000/canceled",
         )
         
         return {
