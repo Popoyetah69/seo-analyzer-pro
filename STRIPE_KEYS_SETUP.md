@@ -17,10 +17,27 @@ Les clés Stripe se trouvent au: https://dashboard.stripe.com/apikeys
 3. Vous arrivez à la page d'accueil
 ```
 
-### **2️⃣ Naviguer vers "API Keys"**
+### **2️⃣ Accéder à l'Environnement de Test**
+
+Sur la page d'accueil Stripe, vous verrez:
 
 ```
-Page d'accueil Stripe Dashboard:
+┌──────────────────────────────────────────┐
+│ "Environnement de test"                 │
+│ (avec bouton BLEU)                      │
+│                                         │
+│ "Accéder à l'environnement de test"    │
+│ ════════════════════════════════════════│
+│ [CLIQUEZ SUR LE BOUTON BLEU]           │
+└──────────────────────────────────────────┘
+```
+
+**👉 Cliquez sur le bouton BLEU "Accéder à l'environnement de test"**
+
+### **3️⃣ Naviguer vers "API Keys"**
+
+```
+Après clic, vous êtes en mode TEST:
 ├── Coin haut-DROIT: "Developers" (ou ⚙️ Settings)
 │   └── Cliquez "Developers"
 │
@@ -31,7 +48,7 @@ Page d'accueil Stripe Dashboard:
 │   └── ...
 ```
 
-### **3️⃣ Copier vos 3 Clés**
+### **4️⃣ Copier vos 3 Clés**
 
 Une fois sur la page "API Keys", vous verrez:
 
@@ -57,7 +74,7 @@ Une fois sur la page "API Keys", vous verrez:
 - `pk_test_...` (Publishable Key)
 - `sk_test_...` (Secret Key)
 
-### **4️⃣ Créer le Webhook (IMPORTANT!)**
+### **5️⃣ Créer le Webhook (IMPORTANT!)**
 
 Les webhooks permettent à Stripe de notifier votre serveur quand un paiement réussit.
 
@@ -73,7 +90,7 @@ Les webhooks permettent à Stripe de notifier votre serveur quand un paiement r�
 7. Copiez ce "Signing secret"
 ```
 
-### **5️⃣ Sélectionner les Events Webhook**
+### **6️⃣ Sélectionnez les Events Webhook**
 
 ```
 Sur la page de votre endpoint:
