@@ -10,7 +10,8 @@ services:
     depends_on:
       - db
     volumes:
-      - ./backend:/app
+      - ./backend:/app/backend
+    working_dir: /app
 
   frontend:
     image: nginx:latest
