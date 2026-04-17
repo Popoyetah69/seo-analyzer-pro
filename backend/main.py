@@ -154,6 +154,14 @@ async def analyze_keyword(request: KeywordAnalysis) -> KeywordAnalysis:
     
     return generate_keyword_data(request.keyword)
 
+@app.get("/api/analyze/keyword", response_model=KeywordAnalysis, tags=["Analysis"])
+async def analyze_keyword_get(keyword: str = Query(..., min_length=1)) -> KeywordAnalysis:
+    """Analyse un keyword (GET version)"""
+    if not keyword or len(keyword.strip()) == 0:
+        raise HTTPException(status_code=400, detail="Keyword cannot be empty")
+    
+    return generate_keyword_data(keyword)
+
 @app.post("/api/generate/content", tags=["Content Generation"])
 async def generate_seo_content(request: ContentGenerationRequest) -> dict:
     """Génère du contenu SEO optimisé"""
