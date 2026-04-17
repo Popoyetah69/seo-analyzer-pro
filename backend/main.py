@@ -12,6 +12,12 @@ import json
 from auth import AuthManager
 from scraper import LegalDataScraper
 
+# Try to import Stripe integration (optional)
+try:
+    from stripe_integration import router as stripe_router
+except ImportError:
+    stripe_router = None
+
 load_dotenv()
 
 app = FastAPI(
@@ -28,6 +34,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include Stripe payment router if available
+if stripe_router:
+    app.include_router(stripe_router, prefix="/api", tags=["Payments"])
 
 # ==================== MODELS ====================
 
