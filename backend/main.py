@@ -9,8 +9,8 @@ import os
 from dotenv import load_dotenv
 import hashlib
 import json
-from backend.auth import AuthManager
-from backend.scraper import LegalDataScraper
+from auth import AuthManager
+from scraper import LegalDataScraper
 
 load_dotenv()
 
