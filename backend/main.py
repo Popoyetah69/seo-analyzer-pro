@@ -9,10 +9,16 @@ import os
 from dotenv import load_dotenv
 import hashlib
 import json
+import logging
 from auth import AuthManager
 from scraper import LegalDataScraper
 from database import init_db, get_db
 import models
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+# Rate limiting
+limiter = Limiter(key_func=get_remote_address)
 
 # Try to import Stripe integration (optional)
 try:
@@ -25,17 +31,46 @@ load_dotenv()
 app = FastAPI(
     title="SEO Analyzer Pro API",
     description="Plateforme SaaS d'analyse SEO et génération de contenu",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-# CORS Configuration
+app.state.limiter = limiter
+
+# CORS Configuration - Restrict to production domain only
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://analyzerseo.store",
+        "https://www.analyzerseo.store",
+        os.getenv("FRONTEND_URL", "https://analyzerseo.store")
+    ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization"],
 )
+
+# Security Headers
+@app.middleware("http")
+async def add_security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return response
+
+# Error handling - don't expose stack traces
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    logger = logging.getLogger(__name__)
+    logger.exception("Unhandled exception: %s", exc)
+    # Return safe error to client, not stack trace
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "request_id": id(request)}
+    )
 
 # Initialize database on startup
 @app.on_event("startup")
@@ -165,6 +200,7 @@ async def health_check():
     }
 
 @app.post("/api/analyze/keyword", response_model=KeywordAnalysis, tags=["Analysis"])
+@limiter.limit("100/minute")  # Rate limit: 100 requests per minute
 async def analyze_keyword(request: KeywordAnalysis) -> KeywordAnalysis:
     """Analyse un keyword pour le potentiel SEO"""
     if not request.keyword or len(request.keyword.strip()) == 0:

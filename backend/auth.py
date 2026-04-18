@@ -21,13 +21,18 @@ class AuthManager:
     
     @staticmethod
     def hash_password(password: str) -> str:
-        """Hash password using SHA256"""
-        return hashlib.sha256(password.encode()).hexdigest()
+        """Hash password using bcrypt with salt"""
+        import bcrypt
+        return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt(rounds=12)).decode('utf-8')
     
     @staticmethod
     def verify_password(plain_password: str, hashed_password: str) -> bool:
-        """Verify password against hash"""
-        return hashlib.sha256(plain_password.encode()).hexdigest() == hashed_password
+        """Verify password against bcrypt hash"""
+        import bcrypt
+        try:
+            return bcrypt.checkpw(plain_password.encode('utf-8'), hashed_password.encode('utf-8'))
+        except Exception:
+            return False
     
     @classmethod
     def create_user(cls, email: str, password: str, plan: str = "free") -> Dict:
