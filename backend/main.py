@@ -11,6 +11,8 @@ import hashlib
 import json
 from auth import AuthManager
 from scraper import LegalDataScraper
+from database import init_db, get_db
+import models
 
 # Try to import Stripe integration (optional)
 try:
@@ -34,6 +36,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Initialize database on startup
+@app.on_event("startup")
+async def startup_event():
+    init_db()
+    print("✅ Database tables initialized")
 
 # Include Stripe payment router if available
 if stripe_router:

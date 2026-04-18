@@ -8,12 +8,15 @@ Run this to integrate Stripe payments into your backend
 import os
 import json
 import logging
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Depends
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 # Install: pip install stripe
 
 import stripe
+from database import get_db
+import models
 
 logger = logging.getLogger(__name__)
 
@@ -209,10 +212,10 @@ async def cancel_subscription(request: CancelSubscription):
         raise HTTPException(status_code=400, detail=str(e))
 
 @router.post("/webhook")
-async def stripe_webhook(request: Request):
+async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
     """
     Handle Stripe webhooks
-    Update your database when payments succeed, subscriptions cancel, etc.
+    Persists events to database with idempotence check (stripe_event_id unique)
     """
     
     payload = await request.body()
@@ -229,43 +232,118 @@ async def stripe_webhook(request: Request):
     except stripe.error.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
     
+    event_id = event.get("id", "unknown")
     event_type = event.get("type", "unknown")
     event_object = event.get("data", {}).get("object", {})
+    customer_id = event_object.get("customer", "unknown")
+    subscription_id = event_object.get("subscription") or event_object.get("id")
 
-    # Handle specific events. Keep webhook 2xx-safe for Stripe retries.
+    # Check if we've already processed this event (idempotence)
+    existing_event = db.query(models.WebhookEvent).filter(
+        models.WebhookEvent.stripe_event_id == event_id
+    ).first()
+    
+    if existing_event:
+        logger.info("Webhook event already processed: %s", event_id)
+        return {"status": "success", "note": "event_already_processed"}
+    
+    # Create webhook event record
+    webhook_event = models.WebhookEvent(
+        stripe_event_id=event_id,
+        event_type=event_type,
+        customer_id=customer_id if customer_id != "unknown" else None,
+        subscription_id=subscription_id,
+        payload=json.dumps(event),
+        status="received"
+    )
+    
     try:
+        # Handle specific events
         if event_type == "customer.subscription.created":
-            customer_id = event_object.get("customer", "unknown")
-            logger.info("New subscription: %s", customer_id)
-            # TODO: Update your database to activate user account
+            webhook_event.status = "processed"
+            logger.info("✅ New subscription: %s", customer_id)
+            
+            # Create or update subscription record
+            subscription = models.Subscription(
+                stripe_subscription_id=subscription_id,
+                stripe_customer_id=customer_id,
+                plan=event_object.get("metadata", {}).get("plan", "unknown"),
+                status=event_object.get("status", "active"),
+                current_period_start=event_object.get("current_period_start"),
+                current_period_end=event_object.get("current_period_end"),
+            )
+            db.add(subscription)
+            db.commit()
 
         elif event_type == "customer.subscription.updated":
-            customer_id = event_object.get("customer", "unknown")
-            logger.info("Subscription updated: %s", customer_id)
-            # TODO: Update plan in your database
+            webhook_event.status = "processed"
+            logger.info("✅ Subscription updated: %s", customer_id)
+            
+            # Update subscription record
+            sub = db.query(models.Subscription).filter(
+                models.Subscription.stripe_subscription_id == subscription_id
+            ).first()
+            if sub:
+                sub.status = event_object.get("status", "active")
+                sub.current_period_end = event_object.get("current_period_end")
+                sub.payment_failed = event_object.get("status") == "past_due"
+                db.commit()
 
         elif event_type == "customer.subscription.deleted":
-            customer_id = event_object.get("customer", "unknown")
-            logger.info("Subscription canceled: %s", customer_id)
-            # TODO: Deactivate user account
+            webhook_event.status = "processed"
+            logger.info("✅ Subscription canceled: %s", customer_id)
+            
+            # Update subscription record
+            sub = db.query(models.Subscription).filter(
+                models.Subscription.stripe_subscription_id == subscription_id
+            ).first()
+            if sub:
+                sub.status = "canceled"
+                sub.canceled_at = event_object.get("canceled_at")
+                db.commit()
 
         elif event_type == "invoice.payment_succeeded":
+            webhook_event.status = "processed"
             amount_paid = event_object.get("amount_paid") or 0
-            customer_id = event_object.get("customer", "unknown")
-            logger.info("Payment received: customer=%s amount=%.2f", customer_id, amount_paid / 100)
-            # TODO: Process payment confirmation, send receipt
+            logger.info("✅ Payment received: customer=%s amount=%.2f", customer_id, amount_paid / 100)
+            
+            # Update subscription if needed
+            sub = db.query(models.Subscription).filter(
+                models.Subscription.stripe_subscription_id == subscription_id
+            ).first()
+            if sub:
+                sub.payment_failed = False
+                db.commit()
 
         elif event_type == "invoice.payment_failed":
-            customer_id = event_object.get("customer", "unknown")
+            webhook_event.status = "processed"
             amount_due = event_object.get("amount_due") or 0
-            logger.warning("Payment failed: customer=%s amount_due=%.2f", customer_id, amount_due / 100)
-            # TODO: Send payment failure notification, retry logic
+            logger.warning("⚠️ Payment failed: customer=%s amount_due=%.2f", customer_id, amount_due / 100)
+            
+            # Update subscription if needed
+            sub = db.query(models.Subscription).filter(
+                models.Subscription.stripe_subscription_id == subscription_id
+            ).first()
+            if sub:
+                sub.payment_failed = True
+                db.commit()
+
+        elif event_type == "checkout.session.completed":
+            webhook_event.status = "processed"
+            logger.info("✅ Checkout completed: %s", customer_id)
 
         else:
-            logger.info("Unhandled Stripe event: %s", event_type)
+            logger.info("ℹ️ Unhandled Stripe event: %s", event_type)
+            webhook_event.status = "received"
 
     except Exception as exc:
+        webhook_event.status = "failed"
+        webhook_event.error_message = str(exc)
         logger.exception("Webhook handler error for event %s: %s", event_type, exc)
+    
+    # Save webhook event record
+    db.add(webhook_event)
+    db.commit()
     
     return {"status": "success"}
 
