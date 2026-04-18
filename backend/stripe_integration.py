@@ -7,12 +7,15 @@ Run this to integrate Stripe payments into your backend
 
 import os
 import json
+import logging
 from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 # Install: pip install stripe
 
 import stripe
+
+logger = logging.getLogger(__name__)
 
 # Initialize Stripe
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "sk_test_your_key_here")
@@ -135,8 +138,8 @@ async def create_checkout_session(request: CreateCheckoutSession):
                 "company": request.company or "N/A"
             },
             mode="subscription",
-            success_url="http://localhost:3000/success?session_id={CHECKOUT_SESSION_ID}",
-            cancel_url="http://localhost:3000/canceled",
+            success_url="https://analyzerseo.store/success?session_id={CHECKOUT_SESSION_ID}",
+            cancel_url="https://analyzerseo.store/canceled",
         )
         
         return {
@@ -226,31 +229,43 @@ async def stripe_webhook(request: Request):
     except stripe.error.SignatureVerificationError:
         raise HTTPException(status_code=400, detail="Invalid signature")
     
-    # Handle specific events
-    if event["type"] == "customer.subscription.created":
-        subscription = event["data"]["object"]
-        print(f"✅ New subscription: {subscription['customer']}")
-        # TODO: Update your database to activate user account
-        
-    elif event["type"] == "customer.subscription.updated":
-        subscription = event["data"]["object"]
-        print(f"✅ Subscription updated: {subscription['customer']}")
-        # TODO: Update plan in your database
-        
-    elif event["type"] == "customer.subscription.deleted":
-        subscription = event["data"]["object"]
-        print(f"❌ Subscription canceled: {subscription['customer']}")
-        # TODO: Deactivate user account
-        
-    elif event["type"] == "invoice.payment_succeeded":
-        invoice = event["data"]["object"]
-        print(f"💰 Payment received: ${invoice['amount_paid']/100}")
-        # TODO: Process payment confirmation, send receipt
-        
-    elif event["type"] == "invoice.payment_failed":
-        invoice = event["data"]["object"]
-        print(f"❌ Payment failed: {invoice['customer']}")
-        # TODO: Send payment failure notification, retry logic
+    event_type = event.get("type", "unknown")
+    event_object = event.get("data", {}).get("object", {})
+
+    # Handle specific events. Keep webhook 2xx-safe for Stripe retries.
+    try:
+        if event_type == "customer.subscription.created":
+            customer_id = event_object.get("customer", "unknown")
+            logger.info("New subscription: %s", customer_id)
+            # TODO: Update your database to activate user account
+
+        elif event_type == "customer.subscription.updated":
+            customer_id = event_object.get("customer", "unknown")
+            logger.info("Subscription updated: %s", customer_id)
+            # TODO: Update plan in your database
+
+        elif event_type == "customer.subscription.deleted":
+            customer_id = event_object.get("customer", "unknown")
+            logger.info("Subscription canceled: %s", customer_id)
+            # TODO: Deactivate user account
+
+        elif event_type == "invoice.payment_succeeded":
+            amount_paid = event_object.get("amount_paid") or 0
+            customer_id = event_object.get("customer", "unknown")
+            logger.info("Payment received: customer=%s amount=%.2f", customer_id, amount_paid / 100)
+            # TODO: Process payment confirmation, send receipt
+
+        elif event_type == "invoice.payment_failed":
+            customer_id = event_object.get("customer", "unknown")
+            amount_due = event_object.get("amount_due") or 0
+            logger.warning("Payment failed: customer=%s amount_due=%.2f", customer_id, amount_due / 100)
+            # TODO: Send payment failure notification, retry logic
+
+        else:
+            logger.info("Unhandled Stripe event: %s", event_type)
+
+    except Exception as exc:
+        logger.exception("Webhook handler error for event %s: %s", event_type, exc)
     
     return {"status": "success"}
 
