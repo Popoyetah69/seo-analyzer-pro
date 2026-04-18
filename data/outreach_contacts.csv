@@ -1,0 +1,31 @@
+name,email,template_type,topic,keyword,product,insight,company_type,priority
+Alice Johnson,alice@seoagency.com,agency,"10 SEO Trends 2026","schema markup",N/A,"Link building still matters",Agency,HIGH
+Bob Chen,bob@freelance-seo.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,HIGH
+Carol Williams,carol@ecomm-store.com,ecommerce,N/A,N/A,"Running Shoes","Keyword research",E-commerce,MEDIUM
+David Martinez,david@seoagency.io,agency,"Why SEO matters","on-page SEO",N/A,"Content is king",Agency,HIGH
+Emma Taylor,emma@digital-agency.com,agency,"2026 SEO predictions","mobile-first indexing",N/A,"Core Web Vitals matter",Agency,HIGH
+Frank Johnson,frank@freelance-experts.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,MEDIUM
+Grace Lee,grace@startup-seo.com,agency,"Competitive analysis","SERP features",N/A,"Local SEO growing",Agency,MEDIUM
+Henry Brown,henry@ecommerce-brand.com,ecommerce,N/A,N/A,"Tech Gadgets","Conversion optimization",E-commerce,MEDIUM
+Isabella Rodriguez,isabella@creative-agency.co.uk,agency,"SEO ROI calculator","cost per acquisition",N/A,"Data-driven SEO",Agency,HIGH
+James Wilson,james@consultant-seo.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,HIGH
+Karen Anderson,karen@seo-boutique.com,agency,"Content strategy masterclass","semantic search",N/A,"AI changing SEO",Agency,MEDIUM
+Leo Kumar,leo@indie-seo.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,MEDIUM
+Maria Garcia,maria@fashion-ecom.com,ecommerce,N/A,N/A,"Fashion Brands","Page speed",E-commerce,MEDIUM
+Nathan Price,nathan@agency-group.com,agency,"SEO for startups","authority building",N/A,"Links still matter",Agency,HIGH
+Olivia Thompson,olivia@freelance-marketing.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,HIGH
+Peter O'Brien,peter@seo-firm.ie,agency,"Technical SEO guide","site migrations",N/A,"Technical SEO critical",Agency,MEDIUM
+Quinn Jackson,quinn@small-ecom.com,ecommerce,N/A,N/A,"Food Products","Reviews strategy",E-commerce,LOW
+Rachel Green,rachel@marketing-agency.net,agency,"International SEO","hreflang implementation",N/A,"Global SEO growing",Agency,MEDIUM
+Samuel Davis,samuel@freelance-consultant.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,MEDIUM
+Tina White,tina@luxury-retail.com,ecommerce,N/A,N/A,"Luxury Goods","Brand authority",E-commerce,HIGH
+Uma Patel,uma@growth-agency.com,agency,"Analytics deep dive","conversion tracking",N/A,"Data matters most",Agency,HIGH
+Victor Chang,victor@freelance-partner.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,MEDIUM
+Whitney Sanders,whitney@commerce-brand.com,ecommerce,N/A,N/A,"Health Supplements","Trust signals",E-commerce,MEDIUM
+Xavier Lopez,xavier@seo-studio.com,agency,"SEO automation","content automation",N/A,"Automation saves time",Agency,MEDIUM
+Yara Hassan,yara@freelance-force.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,HIGH
+Zara Khan,zara@online-market.com,ecommerce,N/A,N/A,"Electronics","Competitive pricing",E-commerce,MEDIUM
+Aaron Tech,aaron@tech-seo.com,agency,"SEO for tech companies","developer experience",N/A,"Developer SEO",Agency,MEDIUM
+Bella Clark,bella@local-seo.com,agency,"Local business SEO","GMB optimization",N/A,"Local is important",Agency,HIGH
+Chris Evans,chris@freelance-pro.com,freelancer,N/A,N/A,N/A,N/A,Freelancer,MEDIUM
+Diana Ross,diana@beauty-ecom.com,ecommerce,N/A,N/A,"Beauty Products","User reviews",E-commerce,MEDIUM
